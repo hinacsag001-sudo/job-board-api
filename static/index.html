@@ -1,0 +1,70 @@
+       <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Listings Portal</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f4f7f6; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        .header { background: #1e293b; color: white; padding: 25px; border-radius: 8px; text-align: center; }
+        .header a { color: #38bdf8; text-decoration: none; margin-left: 15px; font-weight: bold; }
+        .search-box { display: flex; gap: 10px; margin: 20px 0; }
+        input { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
+        button { padding: 12px 20px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #1d4ed8; }
+        .job-card { background: white; padding: 20px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .job-title { margin: 0 0 10px 0; color: #0f172a; }
+        .job-meta { color: #64748b; font-size: 14px; margin-bottom: 10px; }
+        .salary { color: #16a34a; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💼 Job Listings Portal</h1>
+            <p>Production REST API Frontend | <a href="/docs" target="_blank">Open Swagger API Docs ↗</a></p>
+        </div>
+
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search by job title...">
+            <button onclick="fetchJobs()">Search Jobs</button>
+        </div>
+
+        <div id="jobsList">Loading jobs...</div>
+    </div>
+
+    <script>
+        async function fetchJobs() {
+            const query = document.getElementById('searchInput').value;
+            const container = document.getElementById('jobsList');
+            container.innerHTML = "Loading...";
+
+            try {
+                const response = await fetch(`/jobs/${query ? '?title=' + encodeURIComponent(query) : ''}`);
+                const jobs = await response.json();
+
+                if (jobs.length === 0) {
+                    container.innerHTML = "<p>No jobs found. Post some via API!</p>";
+                    return;
+                }
+
+                container.innerHTML = jobs.map(job => `
+                    <div class="job-card">
+                        <h2 class="job-title">${job.title}</h2>
+                        <div class="job-meta">
+                            🏢 <strong>${job.company}</strong> | 📍 ${job.location} | <span class="salary">$${job.salary.toLocaleString()}/yr</span>
+                        </div>
+                        <p>${job.description}</p>
+                    </div>
+                `).join('');
+            } catch (err) {
+                container.innerHTML = "<p style='color:red;'>Failed to load jobs from API.</p>";
+            }
+        }
+
+        fetchJobs();
+    </script>
+</body>
+</html>
