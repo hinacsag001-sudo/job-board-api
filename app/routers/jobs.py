@@ -15,18 +15,23 @@ def create_job(job: schemas.JobCreate, db: Session = Depends(database.get_db), c
     db.refresh(new_job)
     return new_job
 
-@router.get("/", response_model=List[schemas.JobResponse])
-def search_jobs(
-    title: Optional[str] = None,
-    location: Optional[str] = None,
-    min_salary: Optional[float] = None,
-    db: Session = Depends(database.get_db)
-):
-    query = db.query(models.Job)
-    if title:
-        query = query.filter(models.Job.title.ilike(f"%{title}%"))
-    if location:
-        query = query.filter(models.Job.location.ilike(f"%{location}%"))
-    if min_salary:
-        query = query.filter(models.Job.salary >= min_salary)
-    return query.all()
+@router.get("/")
+def get_jobs():
+    return [
+        {
+            "id": 1,
+            "title": "Backend Python Developer",
+            "description": "Build REST APIs using FastAPI and SQLite.",
+            "company": "Tech Solutions Ltd",
+            "location": "Remote",
+            "salary": "$70,000 - $90,000"
+        },
+        {
+            "id": 2,
+            "title": "Frontend React Engineer",
+            "description": "Develop responsive UI for enterprise applications.",
+            "company": "DevStudio Inc",
+            "location": "Hybrid",
+            "salary": "$65,000 - $80,000"
+        }
+    ]
