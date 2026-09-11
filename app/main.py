@@ -10,6 +10,40 @@ from app import models  # noqa: F401  (registers models on Base.metadata before 
 
 Base.metadata.create_all(bind=engine)
 
+from app.database import engine, SessionLocal, Base
+from sqlalchemy import Column, Integer, String, Text
+
+# Ensure tables are created
+Base.metadata.create_all(bind=engine)
+
+@app.on_event("startup")
+def seed_initial_data():
+    db = SessionLocal()
+    try:
+        # Check if jobs already exist
+        from app.models import Job # Replace with your actual Job model import
+        if db.query(Job).count() == 0:
+            job1 = Job(
+                title="Backend Python Developer",
+                description="Build REST APIs using FastAPI and SQLite.",
+                company="Tech Solutions Ltd",
+                location="Remote",
+                salary="$70,000 - $90,000"
+            )
+            job2 = Job(
+                title="Frontend React Engineer",
+                description="Develop responsive UI for enterprise applications.",
+                company="DevStudio Inc",
+                location="Hybrid",
+                salary="$65,000 - $80,000"
+            )
+            db.add_all([job1, job2])
+            db.commit()
+    except Exception as e:
+        print(f"Seeding error: {e}")
+    finally:
+        db.close()
+
 limiter = Limiter(key_func=get_remote_address)
 app = FastAPI(
     title="Job Listings REST API",
